@@ -6,6 +6,7 @@ import { useState } from "react";
 export default function FireSafetyPlanPage() {
   const [edgeColor, setEdgeColor] = useState("#1e3a8a");
   const [middleColor, setMiddleColor] = useState("#ffffff");
+  const [floor, setFloor] = useState("2F");
 
   return (
     <div className="flex flex-1 flex-col bg-slate-50">
@@ -53,6 +54,15 @@ export default function FireSafetyPlanPage() {
                 className="h-8 w-8 cursor-pointer rounded border border-slate-300 p-0.5"
               />
             </label>
+            <label className="flex items-center gap-2 text-sm font-medium text-slate-600">
+              층수 표기
+              <input
+                type="text"
+                value={floor}
+                onChange={(e) => setFloor(e.target.value)}
+                className="h-8 w-20 rounded border border-slate-300 px-2 text-sm font-semibold text-slate-900"
+              />
+            </label>
             <span className="text-sm font-medium text-slate-400">
               A3 · 420 × 297 mm
             </span>
@@ -66,11 +76,17 @@ export default function FireSafetyPlanPage() {
               style={{ maxWidth: "1587px", aspectRatio: "420 / 297" }}
             >
               <div
-                className="flex shrink-0 basis-[15%] items-center justify-center"
+                className="relative flex shrink-0 basis-[15%] flex-col items-center justify-center gap-1"
                 style={{ backgroundColor: edgeColor }}
               >
                 <span className="text-[clamp(1.5rem,4vw,2.75rem)] font-extrabold tracking-[0.5em] text-white">
                   피난안내도
+                </span>
+                <span className="text-[clamp(0.65rem,1.4vw,1rem)] font-medium tracking-[0.15em] text-white/80">
+                  Emergency Evacuation Plan
+                </span>
+                <span className="absolute right-[4%] top-1/2 -translate-y-1/2 rounded bg-white px-[0.8em] py-[0.3em] text-[clamp(1rem,2.6vw,1.75rem)] font-extrabold text-slate-900">
+                  {floor}
                 </span>
               </div>
               <div
