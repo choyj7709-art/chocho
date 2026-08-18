@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import type { ReactNode } from "react";
+import { useRef, useState } from "react";
+import type { ChangeEvent, PointerEvent, ReactNode, RefObject } from "react";
 
 const evacuationSteps: ReactNode[] = [
   <>&quot;불이야&quot;라고 크게 외치십시오.</>,
@@ -146,13 +146,19 @@ function LegendItem({
   label,
   bg,
   icon,
+  onClick,
 }: {
   label: string;
   bg: string;
   icon: ReactNode;
+  onClick?: () => void;
 }) {
   return (
-    <div className="flex flex-col items-center gap-[0.5vw]">
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex flex-col items-center gap-[0.5vw] rounded transition-transform hover:-translate-y-0.5"
+    >
       <span
         className="flex aspect-square w-[2.8vw] min-w-[26px] items-center justify-center rounded-[0.35vw] shadow-sm"
         style={{ backgroundColor: bg }}
@@ -162,6 +168,64 @@ function LegendItem({
       <span className="text-[clamp(0.55rem,1vw,0.75rem)] font-semibold text-slate-800">
         {label}
       </span>
+    </button>
+  );
+}
+
+type PlacedIcon = { id: string; label: string; x: number; y: number };
+
+function PlacedMarker({
+  marker,
+  bg,
+  icon,
+  canvasRef,
+  onMove,
+  onRemove,
+}: {
+  marker: PlacedIcon;
+  bg: string;
+  icon: ReactNode;
+  canvasRef: RefObject<HTMLDivElement | null>;
+  onMove: (id: string, x: number, y: number) => void;
+  onRemove: (id: string) => void;
+}) {
+  const dragging = useRef(false);
+
+  function updatePosition(clientX: number, clientY: number) {
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const x = Math.min(100, Math.max(0, ((clientX - rect.left) / rect.width) * 100));
+    const y = Math.min(100, Math.max(0, ((clientY - rect.top) / rect.height) * 100));
+    onMove(marker.id, x, y);
+  }
+
+  function handlePointerDown(e: PointerEvent<HTMLDivElement>) {
+    e.stopPropagation();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragging.current = true;
+  }
+
+  function handlePointerMove(e: PointerEvent<HTMLDivElement>) {
+    if (!dragging.current) return;
+    updatePosition(e.clientX, e.clientY);
+  }
+
+  function handlePointerUp(e: PointerEvent<HTMLDivElement>) {
+    dragging.current = false;
+    e.currentTarget.releasePointerCapture(e.pointerId);
+  }
+
+  return (
+    <div
+      className="absolute flex aspect-square w-[2.4vw] min-w-[22px] -translate-x-1/2 -translate-y-1/2 touch-none cursor-grab items-center justify-center rounded-[0.3vw] shadow-md ring-2 ring-white active:cursor-grabbing"
+      style={{ left: `${marker.x}%`, top: `${marker.y}%`, backgroundColor: bg }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onDoubleClick={() => onRemove(marker.id)}
+      title="드래그로 이동 · 더블클릭으로 삭제"
+    >
+      {icon}
     </div>
   );
 }
@@ -170,6 +234,33 @@ export default function FireSafetyPlanPage() {
   const [edgeColor, setEdgeColor] = useState("#1e3a8a");
   const [middleColor, setMiddleColor] = useState("#ffffff");
   const [floor, setFloor] = useState("2F");
+  const [planImage, setPlanImage] = useState<string | null>(null);
+  const [placedIcons, setPlacedIcons] = useState<PlacedIcon[]>([]);
+  const canvasRef = useRef<HTMLDivElement>(null);
+
+  function handleImageUpload(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setPlanImage(reader.result as string);
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  }
+
+  function addMarker(label: string) {
+    const id = `${label}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    setPlacedIcons((prev) => [...prev, { id, label, x: 50, y: 50 }]);
+  }
+
+  function moveMarker(id: string, x: number, y: number) {
+    setPlacedIcons((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, x, y } : m))
+    );
+  }
+
+  function removeMarker(id: string) {
+    setPlacedIcons((prev) => prev.filter((m) => m.id !== id));
+  }
 
   return (
     <div className="flex flex-1 flex-col bg-slate-50">
@@ -198,7 +289,28 @@ export default function FireSafetyPlanPage() {
           <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">
             소방도면
           </h1>
-          <div className="flex items-center gap-5">
+          <div className="flex flex-wrap items-center gap-5">
+            <label className="flex items-center gap-2 text-sm font-medium text-slate-600">
+              도면 이미지
+              <span className="cursor-pointer rounded border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                업로드
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </span>
+            </label>
+            {planImage && (
+              <button
+                type="button"
+                onClick={() => setPlanImage(null)}
+                className="text-sm font-medium text-slate-400 hover:text-red-600"
+              >
+                이미지 제거
+              </button>
+            )}
             <label className="flex items-center gap-2 text-sm font-medium text-slate-600">
               상단/하단 색상
               <input
@@ -268,16 +380,57 @@ export default function FireSafetyPlanPage() {
                 </div>
                 <div className="flex min-w-0 flex-1 flex-col">
                   <div
-                    className="min-h-0 flex-1"
-                    style={{
-                      backgroundImage:
-                        "linear-gradient(rgba(15,23,42,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,0.06) 1px, transparent 1px)",
-                      backgroundSize: "5% 5%",
-                    }}
-                  />
+                    ref={canvasRef}
+                    className="relative min-h-0 flex-1 overflow-hidden"
+                    style={
+                      planImage
+                        ? undefined
+                        : {
+                            backgroundImage:
+                              "linear-gradient(rgba(15,23,42,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,0.06) 1px, transparent 1px)",
+                            backgroundSize: "5% 5%",
+                          }
+                    }
+                  >
+                    {planImage ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={planImage}
+                        alt="업로드한 소방도면"
+                        className="pointer-events-none absolute inset-0 h-full w-full object-contain"
+                      />
+                    ) : (
+                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-[2vw] text-center">
+                        <span className="text-[clamp(0.7rem,1.3vw,0.95rem)] font-medium text-slate-400">
+                          위 &quot;도면 이미지&quot;에서 파일을 업로드하세요
+                        </span>
+                      </div>
+                    )}
+                    {placedIcons.map((marker) => {
+                      const meta = legendItems.find(
+                        (item) => item.label === marker.label
+                      );
+                      if (!meta) return null;
+                      return (
+                        <PlacedMarker
+                          key={marker.id}
+                          marker={marker}
+                          bg={meta.bg}
+                          icon={meta.icon}
+                          canvasRef={canvasRef}
+                          onMove={moveMarker}
+                          onRemove={removeMarker}
+                        />
+                      );
+                    })}
+                  </div>
                   <div className="flex shrink-0 items-end justify-center gap-[2.4vw] border-t border-slate-200 px-[1.5vw] py-[1.3vw]">
                     {legendItems.map((item) => (
-                      <LegendItem key={item.label} {...item} />
+                      <LegendItem
+                        key={item.label}
+                        {...item}
+                        onClick={() => addMarker(item.label)}
+                      />
                     ))}
                   </div>
                 </div>
