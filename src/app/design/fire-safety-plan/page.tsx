@@ -55,6 +55,117 @@ function StepList({ title, steps }: { title: string; steps: ReactNode[] }) {
   );
 }
 
+const legendItems: { label: string; bg: string; icon: ReactNode }[] = [
+  {
+    label: "현위치",
+    bg: "#2563eb",
+    icon: (
+      <svg viewBox="0 0 24 24" className="h-[60%] w-[60%]">
+        <circle cx="12" cy="12" r="7" fill="white" />
+      </svg>
+    ),
+  },
+  {
+    label: "피난경로",
+    bg: "#dc2626",
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        className="h-[60%] w-[60%]"
+        fill="none"
+        stroke="white"
+        strokeWidth={2.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M4 12h13M12 6l7 6-7 6" />
+      </svg>
+    ),
+  },
+  {
+    label: "비상구",
+    bg: "#16a34a",
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        className="h-[62%] w-[62%]"
+        fill="none"
+        stroke="white"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="4" y="4" width="8" height="16" rx="0.6" />
+        <path d="M12 12h7m0 0-3-3m3 3-3 3" />
+      </svg>
+    ),
+  },
+  {
+    label: "소화기",
+    bg: "#dc2626",
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        className="h-[62%] w-[62%]"
+        fill="none"
+        stroke="white"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="9" y="7" width="6" height="12" rx="2" />
+        <rect x="10.4" y="4" width="3.2" height="3" rx="0.5" />
+        <path d="M9 11H6.2a1 1 0 0 0-1 1v1.3" />
+        <path d="M4.8 14 3.3 17.5" />
+      </svg>
+    ),
+  },
+  {
+    label: "완강기",
+    bg: "#2563eb",
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        className="h-[62%] w-[62%]"
+        fill="none"
+        stroke="white"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <circle cx="9" cy="6.5" r="2" fill="white" stroke="none" />
+        <path d="M9 8.7v3" />
+        <path d="M9 11.7c-2.2 0-3.4 1.4-3.4 3.4v3" />
+        <circle cx="16" cy="7" r="2.4" />
+      </svg>
+    ),
+  },
+];
+
+function LegendItem({
+  label,
+  bg,
+  icon,
+}: {
+  label: string;
+  bg: string;
+  icon: ReactNode;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-[0.5vw]">
+      <span
+        className="flex aspect-square w-[2.8vw] min-w-[26px] items-center justify-center rounded-[0.35vw] shadow-sm"
+        style={{ backgroundColor: bg }}
+      >
+        {icon}
+      </span>
+      <span className="text-[clamp(0.55rem,1vw,0.75rem)] font-semibold text-slate-800">
+        {label}
+      </span>
+    </div>
+  );
+}
+
 export default function FireSafetyPlanPage() {
   const [edgeColor, setEdgeColor] = useState("#1e3a8a");
   const [middleColor, setMiddleColor] = useState("#ffffff");
@@ -155,14 +266,21 @@ export default function FireSafetyPlanPage() {
                   <StepList title="화재시 대피방법" steps={evacuationSteps} />
                   <StepList title="소화기 사용방법" steps={extinguisherSteps} />
                 </div>
-                <div
-                  className="min-w-0 flex-1"
-                  style={{
-                    backgroundImage:
-                      "linear-gradient(rgba(15,23,42,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,0.06) 1px, transparent 1px)",
-                    backgroundSize: "5% 5%",
-                  }}
-                />
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <div
+                    className="min-h-0 flex-1"
+                    style={{
+                      backgroundImage:
+                        "linear-gradient(rgba(15,23,42,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,0.06) 1px, transparent 1px)",
+                      backgroundSize: "5% 5%",
+                    }}
+                  />
+                  <div className="flex shrink-0 items-end justify-center gap-[2.4vw] border-t border-slate-200 px-[1.5vw] py-[1.3vw]">
+                    {legendItems.map((item) => (
+                      <LegendItem key={item.label} {...item} />
+                    ))}
+                  </div>
+                </div>
               </div>
               <div
                 className="shrink-0 basis-[10%]"
