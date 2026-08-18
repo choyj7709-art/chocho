@@ -33,19 +33,19 @@ const extinguisherSteps: ReactNode[] = [
 function StepList({ title, steps }: { title: string; steps: ReactNode[] }) {
   return (
     <div>
-      <div className="flex items-center gap-[0.5em]">
-        <span className="h-[0.5em] w-[0.5em] rounded-full bg-red-600" />
-        <span className="text-[clamp(0.85rem,1.7vw,1.2rem)] font-extrabold text-red-600">
+      <div className="flex items-center gap-[0.6vw] border-b-2 border-red-600 pb-[0.6vw]">
+        <span className="h-[0.9vw] w-[0.9vw] shrink-0 rounded-full bg-red-600" />
+        <span className="text-[clamp(0.95rem,1.9vw,1.4rem)] font-extrabold tracking-tight text-red-600">
           {title}
         </span>
       </div>
-      <ol className="mt-[0.8em] flex flex-col gap-[0.7em]">
+      <ol className="mt-[1.2vw] flex flex-col gap-[1.1vw]">
         {steps.map((step, i) => (
-          <li key={i} className="flex items-start gap-[0.6em]">
-            <span className="flex h-[1.4em] w-[1.4em] shrink-0 items-center justify-center rounded-full border-2 border-red-600 text-[0.75em] font-bold text-red-600">
+          <li key={i} className="flex items-start gap-[0.8vw]">
+            <span className="flex h-[1.7vw] w-[1.7vw] shrink-0 items-center justify-center rounded-full bg-red-600 text-[0.95vw] font-bold text-white">
               {i + 1}
             </span>
-            <span className="text-[clamp(0.6rem,1.2vw,0.85rem)] leading-snug text-slate-900">
+            <span className="pt-[0.1vw] text-[clamp(0.7rem,1.35vw,0.95rem)] leading-[1.55] text-slate-800">
               {step}
             </span>
           </li>
@@ -145,11 +145,18 @@ export default function FireSafetyPlanPage() {
                 className="flex min-h-0 flex-1"
                 style={{ backgroundColor: middleColor }}
               >
-                <div className="flex basis-[25%] flex-col gap-[1.6em] border-r border-slate-200 p-[1.2em]">
+                <div className="flex basis-[25%] flex-col gap-[2.2vw] border-r border-slate-200 px-[1.6vw] py-[2vw]">
                   <StepList title="화재시 대피방법" steps={evacuationSteps} />
                   <StepList title="소화기 사용방법" steps={extinguisherSteps} />
                 </div>
-                <div className="min-w-0 flex-1" />
+                <div
+                  className="min-w-0 flex-1"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(rgba(15,23,42,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,0.06) 1px, transparent 1px)",
+                    backgroundSize: "5% 5%",
+                  }}
+                />
               </div>
               <div
                 className="shrink-0 basis-[10%]"
