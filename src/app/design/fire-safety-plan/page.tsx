@@ -66,15 +66,19 @@ export default function FireSafetyPlanPage() {
               style={{ maxWidth: "1587px", aspectRatio: "420 / 297" }}
             >
               <div
-                className="shrink-0 basis-[10%]"
+                className="flex shrink-0 basis-[15%] items-center justify-center"
                 style={{ backgroundColor: edgeColor }}
-              />
+              >
+                <span className="text-[clamp(1.5rem,4vw,2.75rem)] font-extrabold tracking-[0.5em] text-white">
+                  피난안내도
+                </span>
+              </div>
               <div
                 className="min-h-0 flex-1"
                 style={{ backgroundColor: middleColor }}
               />
               <div
-                className="shrink-0 basis-[12%]"
+                className="shrink-0 basis-[10%]"
                 style={{ backgroundColor: edgeColor }}
               />
             </div>
