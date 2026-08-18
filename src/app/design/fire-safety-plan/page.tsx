@@ -2,6 +2,58 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import type { ReactNode } from "react";
+
+const evacuationSteps: ReactNode[] = [
+  <>&quot;불이야&quot;라고 크게 외치십시오.</>,
+  <>
+    <strong className="font-bold">발신기(비상벨)</strong>를 누르십시오.
+  </>,
+  <>
+    <strong className="font-bold">낮은 자세</strong>로 피난안내도의 피난 동선을
+    따라 신속하게 대피하십시오.
+  </>,
+];
+
+const extinguisherSteps: ReactNode[] = [
+  <>
+    소화기를 바닥에 내려놓고 손잡이의 <strong className="font-bold">안전핀</strong>
+    을 뽑는다.
+  </>,
+  <>
+    한손은 <strong className="font-bold">손잡이</strong>, 다른 한손은{" "}
+    <strong className="font-bold">호스</strong>를 잡는다.
+  </>,
+  <>
+    손잡이를 힘껏 누르고 <strong className="font-bold">빗자루로 쓸듯이</strong>{" "}
+    방사한다.
+  </>,
+];
+
+function StepList({ title, steps }: { title: string; steps: ReactNode[] }) {
+  return (
+    <div>
+      <div className="flex items-center gap-[0.5em]">
+        <span className="h-[0.5em] w-[0.5em] rounded-full bg-red-600" />
+        <span className="text-[clamp(0.85rem,1.7vw,1.2rem)] font-extrabold text-red-600">
+          {title}
+        </span>
+      </div>
+      <ol className="mt-[0.8em] flex flex-col gap-[0.7em]">
+        {steps.map((step, i) => (
+          <li key={i} className="flex items-start gap-[0.6em]">
+            <span className="flex h-[1.4em] w-[1.4em] shrink-0 items-center justify-center rounded-full border-2 border-red-600 text-[0.75em] font-bold text-red-600">
+              {i + 1}
+            </span>
+            <span className="text-[clamp(0.6rem,1.2vw,0.85rem)] leading-snug text-slate-900">
+              {step}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
 
 export default function FireSafetyPlanPage() {
   const [edgeColor, setEdgeColor] = useState("#1e3a8a");
@@ -90,9 +142,15 @@ export default function FireSafetyPlanPage() {
                 </span>
               </div>
               <div
-                className="min-h-0 flex-1"
+                className="flex min-h-0 flex-1"
                 style={{ backgroundColor: middleColor }}
-              />
+              >
+                <div className="flex basis-[25%] flex-col gap-[1.6em] border-r border-slate-200 p-[1.2em]">
+                  <StepList title="화재시 대피방법" steps={evacuationSteps} />
+                  <StepList title="소화기 사용방법" steps={extinguisherSteps} />
+                </div>
+                <div className="min-w-0 flex-1" />
+              </div>
               <div
                 className="shrink-0 basis-[10%]"
                 style={{ backgroundColor: edgeColor }}
