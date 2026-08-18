@@ -131,10 +131,16 @@ export default function FireSafetyPlanPage() {
                 className="relative flex shrink-0 basis-[15%] flex-col items-center justify-center gap-1"
                 style={{ backgroundColor: edgeColor }}
               >
-                <span className="text-[clamp(1.75rem,4.8vw,3.25rem)] font-extrabold tracking-[0.5em] text-white">
+                <span
+                  className="inline-block text-[clamp(1.75rem,4.8vw,3.25rem)] font-extrabold tracking-[0.5em] text-white"
+                  style={{ marginRight: "-0.5em" }}
+                >
                   피난안내도
                 </span>
-                <span className="text-[clamp(0.65rem,1.4vw,1rem)] font-medium tracking-[0.15em] text-white/80">
+                <span
+                  className="inline-block text-[clamp(0.8rem,1.7vw,1.2rem)] font-medium tracking-[0.15em] text-white/80"
+                  style={{ marginRight: "-0.15em" }}
+                >
                   Emergency Evacuation Plan
                 </span>
                 <span className="absolute right-[4%] top-1/2 -translate-y-1/2 text-[clamp(1rem,2.6vw,1.75rem)] font-extrabold text-white">
