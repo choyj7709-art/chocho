@@ -143,7 +143,7 @@ export default function FireSafetyPlanPage() {
                 >
                   Emergency Evacuation Plan
                 </span>
-                <span className="absolute right-[4%] top-1/2 -translate-y-1/2 text-[clamp(1.5rem,4vw,2.75rem)] font-extrabold text-white">
+                <span className="absolute right-[4%] top-1/2 -translate-y-1/2 text-[clamp(2rem,5.2vw,3.5rem)] font-extrabold text-white">
                   {floor}
                 </span>
               </div>
