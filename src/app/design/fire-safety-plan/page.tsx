@@ -379,7 +379,22 @@ export default function FireSafetyPlanPage() {
   function handleCanvasPointerMove(e: PointerEvent<HTMLDivElement>) {
     if (!routeDrawing.current) return;
     const { x, y } = pointFromEvent(e.clientX, e.clientY);
-    setRouteDraft((prev) => (prev ? { ...prev, x2: x, y2: y } : prev));
+    const shiftKey = e.shiftKey;
+    setRouteDraft((prev) => {
+      if (!prev) return prev;
+      let x2 = x;
+      let y2 = y;
+      if (shiftKey && canvasSize.width && canvasSize.height) {
+        const dxPx = ((x - prev.x1) / 100) * canvasSize.width;
+        const dyPx = ((y - prev.y1) / 100) * canvasSize.height;
+        if (Math.abs(dxPx) > Math.abs(dyPx)) {
+          y2 = prev.y1;
+        } else {
+          x2 = prev.x1;
+        }
+      }
+      return { ...prev, x2, y2 };
+    });
   }
 
   function handleCanvasPointerUp(e: PointerEvent<HTMLDivElement>) {
