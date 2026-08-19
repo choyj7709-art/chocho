@@ -835,7 +835,7 @@ export default function FireSafetyPlanPage() {
                     />
                   )}
                 </div>
-                <div className="flex flex-1 items-center justify-center">
+                <div className="flex flex-1 items-center justify-end">
                   <span className="whitespace-nowrap text-[2.11rem] font-extrabold text-white">
                     화재신고 119
                   </span>
