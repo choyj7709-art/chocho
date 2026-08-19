@@ -235,7 +235,7 @@ function PlacedMarker({
 
   return (
     <div
-      className="absolute flex aspect-square w-[2.4vw] min-w-[22px] -translate-x-1/2 -translate-y-1/2 touch-none cursor-grab items-center justify-center active:cursor-grabbing"
+      className="absolute flex aspect-square w-[3.3vw] min-w-[30px] -translate-x-1/2 -translate-y-1/2 touch-none cursor-grab items-center justify-center active:cursor-grabbing"
       style={{ left: `${marker.x}%`, top: `${marker.y}%`, color: bg }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
