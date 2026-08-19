@@ -33,24 +33,97 @@ const extinguisherSteps: ReactNode[] = [
 function StepList({ title, steps }: { title: string; steps: ReactNode[] }) {
   return (
     <div>
-      <div className="flex items-center gap-[9.5px] border-b-2 border-red-600 pb-[9.5px]">
-        <span className="h-[14.3px] w-[14.3px] shrink-0 rounded-full bg-red-600" />
-        <span className="text-[1.4rem] font-extrabold tracking-tight text-red-600">
+      <div className="flex items-center gap-[6.1px] border-b-2 border-red-600 pb-[5px]">
+        <span className="h-[9.2px] w-[9.2px] shrink-0 rounded-full bg-red-600" />
+        <span className="text-[1.45rem] font-extrabold tracking-tight text-red-600">
           {title}
         </span>
       </div>
-      <ol className="mt-[19px] flex flex-col gap-[17.5px]">
+      <ol className="mt-[9px] flex flex-col gap-[8px]">
         {steps.map((step, i) => (
-          <li key={i} className="flex items-start gap-[12.7px]">
-            <span className="flex h-[27px] w-[27px] shrink-0 items-center justify-center rounded-full bg-red-600 text-[15px] font-bold text-white">
+          <li key={i} className="flex items-start gap-[7px]">
+            <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-red-600 text-[10.5px] font-bold text-white">
               {i + 1}
             </span>
-            <span className="pt-[1.6px] text-[0.95rem] leading-[1.55] text-slate-800">
+            <span className="pt-[1px] text-[1rem] leading-[1.35] text-slate-800">
               {step}
             </span>
           </li>
         ))}
       </ol>
+    </div>
+  );
+}
+
+const extinguisherPictograms: { type: "pin" | "aim" | "sweep"; label: string }[] = [
+  { type: "pin", label: "안전핀 뽑기" },
+  { type: "aim", label: "손잡이 조준" },
+  { type: "sweep", label: "빗자루로 쓸듯이" },
+];
+
+function ExtinguisherPictogram({
+  type,
+  label,
+}: {
+  type: "pin" | "aim" | "sweep";
+  label: string;
+}) {
+  const clipId = `pictoClip-${type}`;
+  return (
+    <div className="flex flex-1 flex-col items-center gap-[3px]">
+      <svg viewBox="0 0 100 100" className="h-[34px] w-[34px]">
+        <defs>
+          <clipPath id={clipId}>
+            <circle cx="50" cy="50" r="48" />
+          </clipPath>
+        </defs>
+        <g clipPath={`url(#${clipId})`}>
+          <rect x="0" y="0" width="100" height="100" fill="#111827" />
+          <polygon points="100,0 100,100 0,100" fill="#dc2626" />
+        </g>
+        {type === "pin" && (
+          <>
+            <circle cx="36" cy="32" r="9" fill="none" stroke="white" strokeWidth={4} />
+            <path d="M36 41v14" stroke="white" strokeWidth={4} strokeLinecap="round" />
+            <path
+              d="M48 58c8-3 14 3 18-5"
+              stroke="white"
+              strokeWidth={4}
+              strokeLinecap="round"
+              fill="none"
+            />
+            <path d="M64 48l5 6-7 2z" fill="white" />
+          </>
+        )}
+        {type === "aim" && (
+          <>
+            <path d="M26 62l22-11 4 8-22 11z" fill="white" />
+            <path
+              d="M60 34c-6 8-13 11-13 20a13 13 0 0026 0c0-7-4-10-4-16 0 4-3 6-3 6 0-6 3-7-6-10z"
+              fill="white"
+            />
+          </>
+        )}
+        {type === "sweep" && (
+          <>
+            <path
+              d="M60 40c-5 6-10 9-10 16a10 10 0 0020 0c0-5-3-8-3-12 0 3-2 5-2 5 0-5 2-6-5-9z"
+              fill="white"
+              opacity={0.5}
+            />
+            <path
+              d="M22 58c6-6 12 6 18 0s12 6 18 0s12 6 18 0"
+              stroke="white"
+              strokeWidth={4}
+              fill="none"
+              strokeLinecap="round"
+            />
+          </>
+        )}
+      </svg>
+      <span className="text-center text-[7.5px] font-semibold leading-tight text-slate-600">
+        {label}
+      </span>
     </div>
   );
 }
@@ -162,9 +235,9 @@ function LegendDisplayItem({
   icon: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center gap-[7.9px]">
+    <div className="flex flex-col items-center gap-[5.1px]">
       <span
-        className={`flex h-[52px] w-[52px] items-center justify-center rounded-[6.3px] ${
+        className={`flex h-[34px] w-[34px] items-center justify-center rounded-[4.1px] ${
           filled ? "" : "border-2"
         }`}
         style={
@@ -263,8 +336,8 @@ function PlacedMarker({
 
   return (
     <div
-      className={`absolute flex h-[52px] w-[52px] -translate-x-1/2 -translate-y-1/2 touch-none cursor-grab items-center justify-center active:cursor-grabbing ${
-        filled ? "rounded-[4.8px] shadow-md" : ""
+      className={`absolute flex h-[34px] w-[34px] -translate-x-1/2 -translate-y-1/2 touch-none cursor-grab items-center justify-center active:cursor-grabbing ${
+        filled ? "rounded-[3.1px] shadow-md" : ""
       }`}
       style={{
         left: `${marker.x}%`,
@@ -631,25 +704,25 @@ export default function FireSafetyPlanPage() {
           <div className="mx-auto flex min-h-full w-full max-w-6xl items-start justify-center py-4 print:max-w-none print:p-0">
             <div
               className="flex shrink-0 flex-col overflow-hidden rounded-sm shadow-[0_8px_30px_rgba(15,23,42,0.15)] print:rounded-none print:shadow-none"
-              style={{ width: "1587px", height: "1122px" }}
+              style={{ width: "1024px", height: "724px" }}
             >
               <div
                 className="relative flex shrink-0 basis-[15%] flex-col items-center justify-center gap-1"
                 style={{ backgroundColor: edgeColor }}
               >
                 <span
-                  className="inline-block text-[3.25rem] font-extrabold tracking-[0.5em] text-white"
+                  className="inline-block text-[2.7rem] font-extrabold tracking-[0.5em] text-white"
                   style={{ marginRight: "-0.5em" }}
                 >
                   피난안내도
                 </span>
                 <span
-                  className="inline-block text-[1.2rem] font-medium tracking-[0.15em] text-white/80"
+                  className="inline-block text-[0.9rem] font-medium tracking-[0.15em] text-white/80"
                   style={{ marginRight: "-0.15em" }}
                 >
                   Emergency Evacuation Plan
                 </span>
-                <span className="absolute right-[4%] top-1/2 -translate-y-1/2 text-[3.5rem] font-extrabold text-white">
+                <span className="absolute right-[4%] top-1/2 -translate-y-1/2 text-[2.25rem] font-extrabold text-white">
                   {floor}
                 </span>
               </div>
@@ -657,9 +730,14 @@ export default function FireSafetyPlanPage() {
                 className="flex min-h-0 flex-1"
                 style={{ backgroundColor: middleColor }}
               >
-                <div className="flex basis-[25%] flex-col gap-[34.9px] border-r border-slate-200 px-[25.4px] py-[31.7px]">
+                <div className="flex basis-[25%] flex-col gap-[13px] border-r border-slate-200 px-[16.4px] py-[14px]">
                   <StepList title="화재시 대피방법" steps={evacuationSteps} />
                   <StepList title="소화기 사용방법" steps={extinguisherSteps} />
+                  <div className="mt-auto flex items-center justify-between gap-[4px]">
+                    {extinguisherPictograms.map((p) => (
+                      <ExtinguisherPictogram key={p.type} {...p} />
+                    ))}
+                  </div>
                 </div>
                 <div className="flex min-w-0 flex-1 flex-col">
                   <div
@@ -689,7 +767,7 @@ export default function FireSafetyPlanPage() {
                         style={{ transform: `scale(${planImageScale / 100})` }}
                       />
                     ) : (
-                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-[31.7px] text-center">
+                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-[20.5px] text-center">
                         <span className="text-[0.95rem] font-medium text-slate-400">
                           위 &quot;도면 이미지&quot;에서 파일을 업로드하세요
                         </span>
@@ -732,7 +810,7 @@ export default function FireSafetyPlanPage() {
                       );
                     })}
                   </div>
-                  <div className="flex shrink-0 items-end justify-center gap-[47.6px] border-t border-slate-200 px-[23.8px] py-[20.6px]">
+                  <div className="flex shrink-0 items-end justify-center gap-[30.7px] border-t border-slate-200 px-[15.4px] py-[13.3px]">
                     {legendItems.map((item) => (
                       <LegendDisplayItem key={item.label} {...item} />
                     ))}
