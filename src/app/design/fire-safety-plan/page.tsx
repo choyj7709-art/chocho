@@ -65,7 +65,7 @@ const legendItems: {
     label: "현위치",
     bg: "#2563eb",
     icon: (
-      <svg viewBox="0 0 24 24" className="h-[60%] w-[60%]">
+      <svg viewBox="0 0 24 24" className="h-[90%] w-[90%]">
         <circle cx="12" cy="12" r="7" fill="currentColor" />
       </svg>
     ),
@@ -76,7 +76,7 @@ const legendItems: {
     icon: (
       <svg
         viewBox="0 0 24 24"
-        className="h-[60%] w-[60%]"
+        className="h-[90%] w-[90%]"
         fill="none"
         stroke="currentColor"
         strokeWidth={2.5}
@@ -94,7 +94,7 @@ const legendItems: {
     icon: (
       <svg
         viewBox="0 0 24 24"
-        className="h-[62%] w-[62%]"
+        className="h-[90%] w-[90%]"
         fill="none"
         stroke="currentColor"
         strokeWidth={2}
@@ -113,7 +113,7 @@ const legendItems: {
     icon: (
       <svg
         viewBox="0 0 24 24"
-        className="h-[62%] w-[62%]"
+        className="h-[90%] w-[90%]"
         fill="none"
         stroke="currentColor"
         strokeWidth={1.8}
@@ -134,7 +134,7 @@ const legendItems: {
     icon: (
       <svg
         viewBox="0 0 24 24"
-        className="h-[62%] w-[62%]"
+        className="h-[90%] w-[90%]"
         fill="none"
         stroke="currentColor"
         strokeWidth={1.8}
