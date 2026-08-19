@@ -818,26 +818,28 @@ export default function FireSafetyPlanPage() {
                 </div>
               </div>
               <div
-                className="flex shrink-0 basis-[10%] items-center justify-between overflow-hidden px-[16.4px]"
+                className="flex shrink-0 basis-[10%] items-center overflow-hidden px-[16.4px]"
                 style={{ backgroundColor: edgeColor }}
               >
                 <div
-                  className="flex h-full items-center overflow-hidden"
-                  style={{ width: "256px" }}
+                  className="flex h-full items-center justify-center overflow-hidden"
+                  style={{ width: "256px", backgroundColor: "#000000" }}
                 >
                   {logoImage && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={logoImage}
                       alt="로고"
-                      className="h-full w-full object-contain object-left"
+                      className="h-full w-full object-contain"
                       style={{ transform: `scale(${logoImageScale / 100})` }}
                     />
                   )}
                 </div>
-                <span className="whitespace-nowrap text-[2.72rem] font-extrabold text-white">
-                  화재신고 119
-                </span>
+                <div className="flex flex-1 items-center justify-center">
+                  <span className="whitespace-nowrap text-[2.11rem] font-extrabold text-white">
+                    화재신고 119
+                  </span>
+                </div>
               </div>
             </div>
           </div>
