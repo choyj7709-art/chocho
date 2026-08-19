@@ -55,7 +55,12 @@ function StepList({ title, steps }: { title: string; steps: ReactNode[] }) {
   );
 }
 
-const legendItems: { label: string; bg: string; icon: ReactNode }[] = [
+const legendItems: {
+  label: string;
+  bg: string;
+  filled?: boolean;
+  icon: ReactNode;
+}[] = [
   {
     label: "현위치",
     bg: "#2563eb",
@@ -85,6 +90,7 @@ const legendItems: { label: string; bg: string; icon: ReactNode }[] = [
   {
     label: "비상구",
     bg: "#16a34a",
+    filled: true,
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -103,6 +109,7 @@ const legendItems: { label: string; bg: string; icon: ReactNode }[] = [
   {
     label: "소화기",
     bg: "#dc2626",
+    filled: true,
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -123,6 +130,7 @@ const legendItems: { label: string; bg: string; icon: ReactNode }[] = [
   {
     label: "완강기",
     bg: "#2563eb",
+    filled: true,
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -145,17 +153,25 @@ const legendItems: { label: string; bg: string; icon: ReactNode }[] = [
 function LegendDisplayItem({
   label,
   bg,
+  filled,
   icon,
 }: {
   label: string;
   bg: string;
+  filled?: boolean;
   icon: ReactNode;
 }) {
   return (
     <div className="flex flex-col items-center gap-[0.5vw]">
       <span
-        className="flex aspect-square w-[3.3vw] min-w-[30px] items-center justify-center rounded-[0.4vw] border-2"
-        style={{ color: bg, borderColor: bg }}
+        className={`flex aspect-square w-[3.3vw] min-w-[30px] items-center justify-center rounded-[0.4vw] ${
+          filled ? "" : "border-2"
+        }`}
+        style={
+          filled
+            ? { color: "#ffffff", backgroundColor: bg }
+            : { color: bg, borderColor: bg }
+        }
       >
         {icon}
       </span>
@@ -169,12 +185,14 @@ function LegendDisplayItem({
 function PlaceButton({
   label,
   bg,
+  filled,
   icon,
   onClick,
   active,
 }: {
   label: string;
   bg: string;
+  filled?: boolean;
   icon: ReactNode;
   onClick: () => void;
   active?: boolean;
@@ -184,10 +202,12 @@ function PlaceButton({
       type="button"
       onClick={onClick}
       title={`${label} 배치`}
-      className="flex h-8 w-8 items-center justify-center rounded transition-transform hover:-translate-y-0.5 hover:bg-slate-100"
+      className={`flex h-8 w-8 items-center justify-center rounded transition-transform hover:-translate-y-0.5 ${
+        filled ? "" : "hover:bg-slate-100"
+      }`}
       style={{
-        color: bg,
-        backgroundColor: active ? "#f1f5f9" : undefined,
+        color: filled ? "#ffffff" : bg,
+        backgroundColor: filled ? bg : active ? "#f1f5f9" : undefined,
         boxShadow: active ? `0 0 0 2px ${bg}` : undefined,
       }}
     >
@@ -201,6 +221,7 @@ type PlacedIcon = { id: string; label: string; x: number; y: number };
 function PlacedMarker({
   marker,
   bg,
+  filled,
   icon,
   canvasRef,
   onMove,
@@ -208,6 +229,7 @@ function PlacedMarker({
 }: {
   marker: PlacedIcon;
   bg: string;
+  filled?: boolean;
   icon: ReactNode;
   canvasRef: RefObject<HTMLDivElement | null>;
   onMove: (id: string, x: number, y: number) => void;
@@ -241,8 +263,15 @@ function PlacedMarker({
 
   return (
     <div
-      className="absolute flex aspect-square w-[3.3vw] min-w-[30px] -translate-x-1/2 -translate-y-1/2 touch-none cursor-grab items-center justify-center active:cursor-grabbing"
-      style={{ left: `${marker.x}%`, top: `${marker.y}%`, color: bg }}
+      className={`absolute flex aspect-square w-[3.3vw] min-w-[30px] -translate-x-1/2 -translate-y-1/2 touch-none cursor-grab items-center justify-center active:cursor-grabbing ${
+        filled ? "rounded-[0.3vw] shadow-md" : ""
+      }`}
+      style={{
+        left: `${marker.x}%`,
+        top: `${marker.y}%`,
+        color: filled ? "#ffffff" : bg,
+        backgroundColor: filled ? bg : undefined,
+      }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
@@ -470,6 +499,7 @@ export default function FireSafetyPlanPage() {
                     key={item.label}
                     label={item.label}
                     bg={item.bg}
+                    filled={item.filled}
                     icon={item.icon}
                     active={item.label === "피난경로" && routeArmed}
                     onClick={() => {
@@ -616,6 +646,7 @@ export default function FireSafetyPlanPage() {
                           key={marker.id}
                           marker={marker}
                           bg={meta.bg}
+                          filled={meta.filled}
                           icon={meta.icon}
                           canvasRef={canvasRef}
                           onMove={moveMarker}
