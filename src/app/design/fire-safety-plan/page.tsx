@@ -61,7 +61,7 @@ const legendItems: { label: string; bg: string; icon: ReactNode }[] = [
     bg: "#2563eb",
     icon: (
       <svg viewBox="0 0 24 24" className="h-[60%] w-[60%]">
-        <circle cx="12" cy="12" r="7" fill="white" />
+        <circle cx="12" cy="12" r="7" fill="currentColor" />
       </svg>
     ),
   },
@@ -73,7 +73,7 @@ const legendItems: { label: string; bg: string; icon: ReactNode }[] = [
         viewBox="0 0 24 24"
         className="h-[60%] w-[60%]"
         fill="none"
-        stroke="white"
+        stroke="currentColor"
         strokeWidth={2.5}
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -90,7 +90,7 @@ const legendItems: { label: string; bg: string; icon: ReactNode }[] = [
         viewBox="0 0 24 24"
         className="h-[62%] w-[62%]"
         fill="none"
-        stroke="white"
+        stroke="currentColor"
         strokeWidth={2}
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -108,7 +108,7 @@ const legendItems: { label: string; bg: string; icon: ReactNode }[] = [
         viewBox="0 0 24 24"
         className="h-[62%] w-[62%]"
         fill="none"
-        stroke="white"
+        stroke="currentColor"
         strokeWidth={1.8}
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -128,12 +128,12 @@ const legendItems: { label: string; bg: string; icon: ReactNode }[] = [
         viewBox="0 0 24 24"
         className="h-[62%] w-[62%]"
         fill="none"
-        stroke="white"
+        stroke="currentColor"
         strokeWidth={1.8}
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <circle cx="9" cy="6.5" r="2" fill="white" stroke="none" />
+        <circle cx="9" cy="6.5" r="2" fill="currentColor" stroke="none" />
         <path d="M9 8.7v3" />
         <path d="M9 11.7c-2.2 0-3.4 1.4-3.4 3.4v3" />
         <circle cx="16" cy="7" r="2.4" />
@@ -154,8 +154,8 @@ function LegendDisplayItem({
   return (
     <div className="flex flex-col items-center gap-[0.5vw]">
       <span
-        className="flex aspect-square w-[2.8vw] min-w-[26px] items-center justify-center rounded-[0.35vw] shadow-sm"
-        style={{ backgroundColor: bg }}
+        className="flex aspect-square w-[2.8vw] min-w-[26px] items-center justify-center"
+        style={{ color: bg }}
       >
         {icon}
       </span>
@@ -182,8 +182,8 @@ function PlaceButton({
       type="button"
       onClick={onClick}
       title={`${label} 배치`}
-      className="flex h-8 w-8 items-center justify-center rounded shadow-sm transition-transform hover:-translate-y-0.5"
-      style={{ backgroundColor: bg }}
+      className="flex h-8 w-8 items-center justify-center rounded transition-transform hover:-translate-y-0.5 hover:bg-slate-100"
+      style={{ color: bg }}
     >
       {icon}
     </button>
@@ -235,8 +235,8 @@ function PlacedMarker({
 
   return (
     <div
-      className="absolute flex aspect-square w-[2.4vw] min-w-[22px] -translate-x-1/2 -translate-y-1/2 touch-none cursor-grab items-center justify-center rounded-[0.3vw] shadow-md ring-2 ring-white active:cursor-grabbing"
-      style={{ left: `${marker.x}%`, top: `${marker.y}%`, backgroundColor: bg }}
+      className="absolute flex aspect-square w-[2.4vw] min-w-[22px] -translate-x-1/2 -translate-y-1/2 touch-none cursor-grab items-center justify-center active:cursor-grabbing"
+      style={{ left: `${marker.x}%`, top: `${marker.y}%`, color: bg }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
