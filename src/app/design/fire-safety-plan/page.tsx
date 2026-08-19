@@ -342,6 +342,7 @@ export default function FireSafetyPlanPage() {
   const [middleColor, setMiddleColor] = useState("#ffffff");
   const [floor, setFloor] = useState("2F");
   const [planImage, setPlanImage] = useState<string | null>(null);
+  const [logoImage, setLogoImage] = useState<string | null>(null);
   const [placedIcons, setPlacedIcons] = useState<PlacedIcon[]>([]);
   const [routes, setRoutes] = useState<PlacedRoute[]>([]);
   const [routeArmed, setRouteArmed] = useState(false);
@@ -366,6 +367,15 @@ export default function FireSafetyPlanPage() {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => setPlanImage(reader.result as string);
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  }
+
+  function handleLogoUpload(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setLogoImage(reader.result as string);
     reader.readAsDataURL(file);
     e.target.value = "";
   }
@@ -489,6 +499,27 @@ export default function FireSafetyPlanPage() {
                 className="text-sm font-medium text-slate-400 hover:text-red-600"
               >
                 이미지 제거
+              </button>
+            )}
+            <label className="flex items-center gap-2 text-sm font-medium text-slate-600">
+              로고 이미지
+              <span className="cursor-pointer rounded border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                업로드
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  className="hidden"
+                />
+              </span>
+            </label>
+            {logoImage && (
+              <button
+                type="button"
+                onClick={() => setLogoImage(null)}
+                className="text-sm font-medium text-slate-400 hover:text-red-600"
+              >
+                로고 제거
               </button>
             )}
             <div className="flex items-center gap-2 text-sm font-medium text-slate-600">
@@ -663,9 +694,18 @@ export default function FireSafetyPlanPage() {
                 </div>
               </div>
               <div
-                className="shrink-0 basis-[10%]"
+                className="flex shrink-0 basis-[10%] items-center justify-center"
                 style={{ backgroundColor: edgeColor }}
-              />
+              >
+                {logoImage && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={logoImage}
+                    alt="로고"
+                    className="h-[70%] w-auto max-w-[30%] object-contain"
+                  />
+                )}
+              </div>
             </div>
           </div>
         </div>
