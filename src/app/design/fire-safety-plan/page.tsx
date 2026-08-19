@@ -342,7 +342,9 @@ export default function FireSafetyPlanPage() {
   const [middleColor, setMiddleColor] = useState("#ffffff");
   const [floor, setFloor] = useState("2F");
   const [planImage, setPlanImage] = useState<string | null>(null);
+  const [planImageScale, setPlanImageScale] = useState(100);
   const [logoImage, setLogoImage] = useState<string | null>(null);
+  const [logoImageScale, setLogoImageScale] = useState(100);
   const [placedIcons, setPlacedIcons] = useState<PlacedIcon[]>([]);
   const [routes, setRoutes] = useState<PlacedRoute[]>([]);
   const [routeArmed, setRouteArmed] = useState(false);
@@ -502,6 +504,20 @@ export default function FireSafetyPlanPage() {
               </button>
             )}
             <label className="flex items-center gap-2 text-sm font-medium text-slate-600">
+              도면 비율
+              <input
+                type="range"
+                min={10}
+                max={250}
+                value={planImageScale}
+                onChange={(e) => setPlanImageScale(Number(e.target.value))}
+                className="w-24"
+              />
+              <span className="w-11 text-right text-xs text-slate-500">
+                {planImageScale}%
+              </span>
+            </label>
+            <label className="flex items-center gap-2 text-sm font-medium text-slate-600">
               로고 이미지
               <span className="cursor-pointer rounded border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
                 업로드
@@ -522,6 +538,20 @@ export default function FireSafetyPlanPage() {
                 로고 제거
               </button>
             )}
+            <label className="flex items-center gap-2 text-sm font-medium text-slate-600">
+              로고 비율
+              <input
+                type="range"
+                min={10}
+                max={250}
+                value={logoImageScale}
+                onChange={(e) => setLogoImageScale(Number(e.target.value))}
+                className="w-24"
+              />
+              <span className="w-11 text-right text-xs text-slate-500">
+                {logoImageScale}%
+              </span>
+            </label>
             <div className="flex items-center gap-2 text-sm font-medium text-slate-600">
               아이콘 배치
               <div className="flex items-center gap-1.5">
@@ -641,6 +671,7 @@ export default function FireSafetyPlanPage() {
                         src={planImage}
                         alt="업로드한 소방도면"
                         className="pointer-events-none absolute inset-0 h-full w-full object-contain"
+                        style={{ transform: `scale(${planImageScale / 100})` }}
                       />
                     ) : (
                       <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-[2vw] text-center">
@@ -694,7 +725,7 @@ export default function FireSafetyPlanPage() {
                 </div>
               </div>
               <div
-                className="flex shrink-0 basis-[10%] items-center justify-center"
+                className="flex shrink-0 basis-[10%] items-center justify-center overflow-hidden"
                 style={{ backgroundColor: edgeColor }}
               >
                 {logoImage && (
@@ -702,7 +733,8 @@ export default function FireSafetyPlanPage() {
                   <img
                     src={logoImage}
                     alt="로고"
-                    className="h-[70%] w-auto max-w-[30%] object-contain"
+                    className="h-full w-full object-contain"
+                    style={{ transform: `scale(${logoImageScale / 100})` }}
                   />
                 )}
               </div>
