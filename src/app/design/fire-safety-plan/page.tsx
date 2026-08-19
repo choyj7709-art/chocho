@@ -154,8 +154,8 @@ function LegendDisplayItem({
   return (
     <div className="flex flex-col items-center gap-[0.5vw]">
       <span
-        className="flex aspect-square w-[2.8vw] min-w-[26px] items-center justify-center"
-        style={{ color: bg }}
+        className="flex aspect-square w-[3.3vw] min-w-[30px] items-center justify-center rounded-[0.4vw] border-2"
+        style={{ color: bg, borderColor: bg }}
       >
         {icon}
       </span>
@@ -456,7 +456,7 @@ export default function FireSafetyPlanPage() {
                       );
                     })}
                   </div>
-                  <div className="flex shrink-0 items-end justify-center gap-[2.4vw] border-t border-slate-200 px-[1.5vw] py-[1.3vw]">
+                  <div className="flex shrink-0 items-end justify-center gap-[3vw] border-t border-slate-200 px-[1.5vw] py-[1.3vw]">
                     {legendItems.map((item) => (
                       <LegendDisplayItem key={item.label} {...item} />
                     ))}
