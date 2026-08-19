@@ -3,12 +3,15 @@
   "configurations": [
     {
       "name": "dev",
-      "runtimeExecutable": "cmd.exe",
+      "runtimeExecutable": "C:\\Program Files\\nodejs\\node.exe",
       "runtimeArgs": [
-        "/d",
-        "/c",
-        "set PATH=C:\\PROGRA~1\\nodejs;%PATH% && npm run dev"
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+        "run",
+        "dev"
       ],
+      "env": {
+        "PATH": "C:\\Windows\\system32;C:\\Windows;C:\\Windows\\System32\\Wbem;C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\;C:\\Windows\\System32\\OpenSSH\\;C:\\Program Files\\Bandizip\\;C:\\Program Files\\Git\\cmd;C:\\Program Files\\nodejs\\;C:\\Users\\USER\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\USER\\AppData\\Roaming\\npm"
+      },
       "port": 3000
     }
   ]
