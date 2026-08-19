@@ -142,23 +142,17 @@ const legendItems: { label: string; bg: string; icon: ReactNode }[] = [
   },
 ];
 
-function LegendItem({
+function LegendDisplayItem({
   label,
   bg,
   icon,
-  onClick,
 }: {
   label: string;
   bg: string;
   icon: ReactNode;
-  onClick?: () => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex flex-col items-center gap-[0.5vw] rounded transition-transform hover:-translate-y-0.5"
-    >
+    <div className="flex flex-col items-center gap-[0.5vw]">
       <span
         className="flex aspect-square w-[2.8vw] min-w-[26px] items-center justify-center rounded-[0.35vw] shadow-sm"
         style={{ backgroundColor: bg }}
@@ -168,6 +162,30 @@ function LegendItem({
       <span className="text-[clamp(0.55rem,1vw,0.75rem)] font-semibold text-slate-800">
         {label}
       </span>
+    </div>
+  );
+}
+
+function PlaceButton({
+  label,
+  bg,
+  icon,
+  onClick,
+}: {
+  label: string;
+  bg: string;
+  icon: ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={`${label} 배치`}
+      className="flex h-8 w-8 items-center justify-center rounded shadow-sm transition-transform hover:-translate-y-0.5"
+      style={{ backgroundColor: bg }}
+    >
+      {icon}
     </button>
   );
 }
@@ -311,6 +329,20 @@ export default function FireSafetyPlanPage() {
                 이미지 제거
               </button>
             )}
+            <div className="flex items-center gap-2 text-sm font-medium text-slate-600">
+              아이콘 배치
+              <div className="flex items-center gap-1.5">
+                {legendItems.map((item) => (
+                  <PlaceButton
+                    key={item.label}
+                    label={item.label}
+                    bg={item.bg}
+                    icon={item.icon}
+                    onClick={() => addMarker(item.label)}
+                  />
+                ))}
+              </div>
+            </div>
             <label className="flex items-center gap-2 text-sm font-medium text-slate-600">
               상단/하단 색상
               <input
@@ -426,11 +458,7 @@ export default function FireSafetyPlanPage() {
                   </div>
                   <div className="flex shrink-0 items-end justify-center gap-[2.4vw] border-t border-slate-200 px-[1.5vw] py-[1.3vw]">
                     {legendItems.map((item) => (
-                      <LegendItem
-                        key={item.label}
-                        {...item}
-                        onClick={() => addMarker(item.label)}
-                      />
+                      <LegendDisplayItem key={item.label} {...item} />
                     ))}
                   </div>
                 </div>
