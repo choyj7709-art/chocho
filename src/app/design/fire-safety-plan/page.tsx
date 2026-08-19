@@ -456,7 +456,15 @@ export default function FireSafetyPlanPage() {
 
   return (
     <div className="flex flex-1 flex-col bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
+      <style jsx global>{`
+        @media print {
+          @page {
+            size: 420mm 297mm;
+            margin: 0;
+          }
+        }
+      `}</style>
+      <header className="border-b border-slate-200 bg-white print:hidden">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-4 px-6">
           <Link
             href="/"
@@ -476,8 +484,8 @@ export default function FireSafetyPlanPage() {
         </div>
       </header>
 
-      <section className="flex flex-1 flex-col">
-        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-6 pt-8">
+      <section className="flex flex-1 flex-col print:block">
+        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-6 pt-8 print:hidden">
           <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">
             소방도면
           </h1>
@@ -609,13 +617,20 @@ export default function FireSafetyPlanPage() {
             <span className="text-sm font-medium text-slate-400">
               A3 · 420 × 297 mm
             </span>
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="rounded bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-700"
+            >
+              PDF로 저장
+            </button>
           </div>
         </div>
 
-        <div className="mt-6 flex-1 overflow-auto bg-slate-200/70 px-6 pb-16">
-          <div className="mx-auto flex min-h-full w-full max-w-6xl items-start justify-center py-4">
+        <div className="mt-6 flex-1 overflow-auto bg-slate-200/70 px-6 pb-16 print:m-0 print:overflow-visible print:bg-white print:p-0">
+          <div className="mx-auto flex min-h-full w-full max-w-6xl items-start justify-center py-4 print:max-w-none print:p-0">
             <div
-              className="flex w-full shrink-0 flex-col overflow-hidden rounded-sm shadow-[0_8px_30px_rgba(15,23,42,0.15)]"
+              className="flex w-full shrink-0 flex-col overflow-hidden rounded-sm shadow-[0_8px_30px_rgba(15,23,42,0.15)] print:rounded-none print:shadow-none"
               style={{ maxWidth: "1587px", aspectRatio: "420 / 297" }}
             >
               <div
