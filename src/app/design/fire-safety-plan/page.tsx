@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ChangeEvent, PointerEvent, ReactNode, RefObject } from "react";
 
 const evacuationSteps: ReactNode[] = [
@@ -171,11 +171,13 @@ function PlaceButton({
   bg,
   icon,
   onClick,
+  active,
 }: {
   label: string;
   bg: string;
   icon: ReactNode;
   onClick: () => void;
+  active?: boolean;
 }) {
   return (
     <button
@@ -183,7 +185,11 @@ function PlaceButton({
       onClick={onClick}
       title={`${label} 배치`}
       className="flex h-8 w-8 items-center justify-center rounded transition-transform hover:-translate-y-0.5 hover:bg-slate-100"
-      style={{ color: bg }}
+      style={{
+        color: bg,
+        backgroundColor: active ? "#f1f5f9" : undefined,
+        boxShadow: active ? `0 0 0 2px ${bg}` : undefined,
+      }}
     >
       {icon}
     </button>
@@ -248,13 +254,83 @@ function PlacedMarker({
   );
 }
 
+type RoutePoints = { x1: number; y1: number; x2: number; y2: number };
+type PlacedRoute = RoutePoints & { id: string };
+
+function RouteArrow({
+  route,
+  canvasSize,
+  onRemove,
+  preview,
+}: {
+  route: RoutePoints;
+  canvasSize: { width: number; height: number };
+  onRemove?: () => void;
+  preview?: boolean;
+}) {
+  const x1 = (route.x1 / 100) * canvasSize.width;
+  const y1 = (route.y1 / 100) * canvasSize.height;
+  const x2 = (route.x2 / 100) * canvasSize.width;
+  const y2 = (route.y2 / 100) * canvasSize.height;
+  const angle = Math.atan2(y2 - y1, x2 - x1);
+  const headSize = 13;
+  const spread = Math.PI / 7;
+  const wing1X = x2 - headSize * Math.cos(angle - spread);
+  const wing1Y = y2 - headSize * Math.sin(angle - spread);
+  const wing2X = x2 - headSize * Math.cos(angle + spread);
+  const wing2Y = y2 - headSize * Math.sin(angle + spread);
+
+  return (
+    <g
+      className={preview ? "pointer-events-none opacity-70" : "pointer-events-auto cursor-pointer"}
+      onDoubleClick={onRemove}
+    >
+      {!preview && (
+        <line
+          x1={x1}
+          y1={y1}
+          x2={x2}
+          y2={y2}
+          stroke="transparent"
+          strokeWidth={16}
+          strokeLinecap="round"
+        />
+      )}
+      <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#dc2626" strokeWidth={3} strokeLinecap="round" />
+      <polygon
+        points={`${x2},${y2} ${wing1X},${wing1Y} ${wing2X},${wing2Y}`}
+        fill="#dc2626"
+      />
+      {!preview && (
+        <title>더블클릭으로 삭제</title>
+      )}
+    </g>
+  );
+}
+
 export default function FireSafetyPlanPage() {
   const [edgeColor, setEdgeColor] = useState("#1e3a8a");
   const [middleColor, setMiddleColor] = useState("#ffffff");
   const [floor, setFloor] = useState("2F");
   const [planImage, setPlanImage] = useState<string | null>(null);
   const [placedIcons, setPlacedIcons] = useState<PlacedIcon[]>([]);
+  const [routes, setRoutes] = useState<PlacedRoute[]>([]);
+  const [routeArmed, setRouteArmed] = useState(false);
+  const [routeDraft, setRouteDraft] = useState<RoutePoints | null>(null);
+  const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
   const canvasRef = useRef<HTMLDivElement>(null);
+  const routeDrawing = useRef(false);
+
+  useEffect(() => {
+    const el = canvasRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      const { width, height } = entries[0].contentRect;
+      setCanvasSize({ width, height });
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   function handleImageUpload(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -278,6 +354,48 @@ export default function FireSafetyPlanPage() {
 
   function removeMarker(id: string) {
     setPlacedIcons((prev) => prev.filter((m) => m.id !== id));
+  }
+
+  function removeRoute(id: string) {
+    setRoutes((prev) => prev.filter((r) => r.id !== id));
+  }
+
+  function pointFromEvent(clientX: number, clientY: number) {
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!rect) return { x: 0, y: 0 };
+    const x = Math.min(100, Math.max(0, ((clientX - rect.left) / rect.width) * 100));
+    const y = Math.min(100, Math.max(0, ((clientY - rect.top) / rect.height) * 100));
+    return { x, y };
+  }
+
+  function handleCanvasPointerDown(e: PointerEvent<HTMLDivElement>) {
+    if (!routeArmed) return;
+    const { x, y } = pointFromEvent(e.clientX, e.clientY);
+    e.currentTarget.setPointerCapture(e.pointerId);
+    routeDrawing.current = true;
+    setRouteDraft({ x1: x, y1: y, x2: x, y2: y });
+  }
+
+  function handleCanvasPointerMove(e: PointerEvent<HTMLDivElement>) {
+    if (!routeDrawing.current) return;
+    const { x, y } = pointFromEvent(e.clientX, e.clientY);
+    setRouteDraft((prev) => (prev ? { ...prev, x2: x, y2: y } : prev));
+  }
+
+  function handleCanvasPointerUp(e: PointerEvent<HTMLDivElement>) {
+    if (!routeDrawing.current) return;
+    routeDrawing.current = false;
+    e.currentTarget.releasePointerCapture(e.pointerId);
+    if (routeDraft) {
+      const dx = routeDraft.x2 - routeDraft.x1;
+      const dy = routeDraft.y2 - routeDraft.y1;
+      if (Math.hypot(dx, dy) > 1.5) {
+        const id = `피난경로-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+        setRoutes((prev) => [...prev, { id, ...routeDraft }]);
+      }
+    }
+    setRouteDraft(null);
+    setRouteArmed(false);
   }
 
   return (
@@ -338,10 +456,22 @@ export default function FireSafetyPlanPage() {
                     label={item.label}
                     bg={item.bg}
                     icon={item.icon}
-                    onClick={() => addMarker(item.label)}
+                    active={item.label === "피난경로" && routeArmed}
+                    onClick={() => {
+                      if (item.label === "피난경로") {
+                        setRouteArmed((prev) => !prev);
+                      } else {
+                        addMarker(item.label);
+                      }
+                    }}
                   />
                 ))}
               </div>
+              {routeArmed && (
+                <span className="text-xs font-medium text-red-600">
+                  도면 위에서 드래그하여 피난경로를 그리세요
+                </span>
+              )}
             </div>
             <label className="flex items-center gap-2 text-sm font-medium text-slate-600">
               상단/하단 색상
@@ -413,7 +543,9 @@ export default function FireSafetyPlanPage() {
                 <div className="flex min-w-0 flex-1 flex-col">
                   <div
                     ref={canvasRef}
-                    className="relative min-h-0 flex-1 overflow-hidden"
+                    className={`relative min-h-0 flex-1 overflow-hidden ${
+                      routeArmed ? "cursor-crosshair" : ""
+                    }`}
                     style={
                       planImage
                         ? undefined
@@ -423,6 +555,9 @@ export default function FireSafetyPlanPage() {
                             backgroundSize: "5% 5%",
                           }
                     }
+                    onPointerDown={handleCanvasPointerDown}
+                    onPointerMove={handleCanvasPointerMove}
+                    onPointerUp={handleCanvasPointerUp}
                   >
                     {planImage ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -438,6 +573,24 @@ export default function FireSafetyPlanPage() {
                         </span>
                       </div>
                     )}
+                    <svg
+                      className="pointer-events-none absolute inset-0"
+                      width={canvasSize.width}
+                      height={canvasSize.height}
+                      viewBox={`0 0 ${canvasSize.width || 1} ${canvasSize.height || 1}`}
+                    >
+                      {routes.map((route) => (
+                        <RouteArrow
+                          key={route.id}
+                          route={route}
+                          canvasSize={canvasSize}
+                          onRemove={() => removeRoute(route.id)}
+                        />
+                      ))}
+                      {routeDraft && (
+                        <RouteArrow route={routeDraft} canvasSize={canvasSize} preview />
+                      )}
+                    </svg>
                     {placedIcons.map((marker) => {
                       const meta = legendItems.find(
                         (item) => item.label === marker.label
