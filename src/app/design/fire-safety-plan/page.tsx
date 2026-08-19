@@ -707,22 +707,22 @@ export default function FireSafetyPlanPage() {
               style={{ width: "1024px", height: "724px" }}
             >
               <div
-                className="relative flex shrink-0 basis-[15%] flex-col items-center justify-center gap-1"
+                className="relative flex shrink-0 basis-[15%] flex-col items-center justify-center gap-1 overflow-hidden"
                 style={{ backgroundColor: edgeColor }}
               >
                 <span
-                  className="inline-block text-[2.7rem] font-extrabold tracking-[0.5em] text-white"
+                  className="inline-block text-[3.25rem] font-extrabold tracking-[0.5em] text-white"
                   style={{ marginRight: "-0.5em" }}
                 >
                   피난안내도
                 </span>
                 <span
-                  className="inline-block text-[0.9rem] font-medium tracking-[0.15em] text-white/80"
+                  className="inline-block text-[1.07rem] font-medium tracking-[0.15em] text-white/80"
                   style={{ marginRight: "-0.15em" }}
                 >
                   Emergency Evacuation Plan
                 </span>
-                <span className="absolute right-[4%] top-1/2 -translate-y-1/2 text-[2.25rem] font-extrabold text-white">
+                <span className="absolute right-[4%] top-1/2 -translate-y-1/2 text-[4.07rem] font-extrabold text-white">
                   {floor}
                 </span>
               </div>
@@ -818,18 +818,26 @@ export default function FireSafetyPlanPage() {
                 </div>
               </div>
               <div
-                className="flex shrink-0 basis-[10%] items-center justify-center overflow-hidden"
+                className="flex shrink-0 basis-[10%] items-center justify-between overflow-hidden px-[16.4px]"
                 style={{ backgroundColor: edgeColor }}
               >
-                {logoImage && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={logoImage}
-                    alt="로고"
-                    className="h-full w-full object-contain"
-                    style={{ transform: `scale(${logoImageScale / 100})` }}
-                  />
-                )}
+                <div
+                  className="flex h-full items-center overflow-hidden"
+                  style={{ width: "256px" }}
+                >
+                  {logoImage && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={logoImage}
+                      alt="로고"
+                      className="h-full w-full object-contain object-left"
+                      style={{ transform: `scale(${logoImageScale / 100})` }}
+                    />
+                  )}
+                </div>
+                <span className="whitespace-nowrap text-[2.72rem] font-extrabold text-white">
+                  화재신고 119
+                </span>
               </div>
             </div>
           </div>
