@@ -15,10 +15,17 @@ type UsageRow = {
 type GroupStat = {
   department: string;
   item: string;
-  dailyAvg: number;
-  weeklyAvg: number;
   thisMonthTotal: number;
   lastMonthTotal: number;
+  diff: number;
+  diffRate: number | null;
+};
+
+type ItemPivotRow = {
+  item: string;
+  byDept: Record<string, number>;
+  totalThisMonth: number;
+  totalLastMonth: number;
   diff: number;
   diffRate: number | null;
 };
@@ -240,7 +247,6 @@ export default function SupplyUsagePage() {
     const currentKey = monthKey(maxDate);
     const prevDate = new Date(maxDate.getFullYear(), maxDate.getMonth() - 1, 1);
     const prevKey = monthKey(prevDate);
-    const elapsedDays = Math.max(1, maxDate.getDate());
 
     const byGroup = new Map<string, { department: string; item: string; thisMonth: number; lastMonth: number }>();
     for (const r of rows) {
@@ -253,14 +259,11 @@ export default function SupplyUsagePage() {
     }
 
     const groupStats: GroupStat[] = Array.from(byGroup.values()).map((g) => {
-      const dailyAvg = g.thisMonth / elapsedDays;
       const diff = g.thisMonth - g.lastMonth;
       const diffRate = g.lastMonth > 0 ? (diff / g.lastMonth) * 100 : g.thisMonth > 0 ? null : 0;
       return {
         department: g.department,
         item: g.item,
-        dailyAvg,
-        weeklyAvg: dailyAvg * 7,
         thisMonthTotal: g.thisMonth,
         lastMonthTotal: g.lastMonth,
         diff,
@@ -284,9 +287,30 @@ export default function SupplyUsagePage() {
     };
   }, [rows]);
 
-  const filteredGroups = groups.filter((g) => {
-    const deptOk = departmentFilter === "전체" || g.department === departmentFilter;
-    const itemOk = itemSearch.trim() === "" || g.item.includes(itemSearch.trim());
+  const itemRows = useMemo(() => {
+    const byItem = new Map<string, ItemPivotRow>();
+    for (const g of groups) {
+      const row =
+        byItem.get(g.item) ??
+        ({ item: g.item, byDept: {}, totalThisMonth: 0, totalLastMonth: 0, diff: 0, diffRate: 0 } as ItemPivotRow);
+      row.byDept[g.department] = (row.byDept[g.department] ?? 0) + g.thisMonthTotal;
+      row.totalThisMonth += g.thisMonthTotal;
+      row.totalLastMonth += g.lastMonthTotal;
+      byItem.set(g.item, row);
+    }
+    const list = Array.from(byItem.values()).map((row) => {
+      const diff = row.totalThisMonth - row.totalLastMonth;
+      const diffRate =
+        row.totalLastMonth > 0 ? (diff / row.totalLastMonth) * 100 : row.totalThisMonth > 0 ? null : 0;
+      return { ...row, diff, diffRate };
+    });
+    list.sort((a, b) => a.item.localeCompare(b.item));
+    return list;
+  }, [groups]);
+
+  const filteredItemRows = itemRows.filter((row) => {
+    const deptOk = departmentFilter === "전체" || (row.byDept[departmentFilter] ?? 0) > 0;
+    const itemOk = itemSearch.trim() === "" || row.item.includes(itemSearch.trim());
     return deptOk && itemOk;
   });
 
@@ -394,7 +418,7 @@ export default function SupplyUsagePage() {
                 placeholder="품목명 검색"
                 className="h-9 w-48 rounded border border-slate-300 px-2 text-sm text-slate-800"
               />
-              <span className="text-xs text-slate-400">{filteredGroups.length}개 항목</span>
+              <span className="text-xs text-slate-400">{filteredItemRows.length}개 품목</span>
             </div>
 
             {itemDashboardData && (
@@ -407,38 +431,42 @@ export default function SupplyUsagePage() {
             )}
 
             <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
-              <table className="w-full min-w-[820px] text-sm">
+              <table className="w-full text-sm" style={{ minWidth: `${640 + departments.length * 100}px` }}>
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-50 text-left text-slate-500">
-                    <th className="px-4 py-3 font-medium">부서/창고명</th>
                     <th className="px-4 py-3 font-medium">품목명</th>
-                    <th className="px-4 py-3 font-medium">일 사용량</th>
-                    <th className="px-4 py-3 font-medium">주 사용량</th>
-                    <th className="px-4 py-3 font-medium">
-                      달 사용량
+                    {departments.map((d) => (
+                      <th key={d} className="whitespace-nowrap px-4 py-3 font-medium">
+                        {d}
+                      </th>
+                    ))}
+                    <th className="whitespace-nowrap px-4 py-3 font-medium">
+                      합계
                       <span className="ml-1 font-normal text-slate-400">({currentMonthLabel})</span>
                     </th>
-                    <th className="px-4 py-3 font-medium">전월 대비</th>
+                    <th className="whitespace-nowrap px-4 py-3 font-medium">전월 대비</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredGroups.map((g) => (
-                    <tr key={`${g.department}__${g.item}`} className="border-b border-slate-100 last:border-0">
-                      <td className="px-4 py-2.5 text-slate-800">{g.department}</td>
-                      <td className="px-4 py-2.5 font-medium text-slate-900">{g.item}</td>
-                      <td className="px-4 py-2.5 text-slate-600">{formatNumber(g.dailyAvg)}</td>
-                      <td className="px-4 py-2.5 text-slate-600">{formatNumber(g.weeklyAvg)}</td>
+                  {filteredItemRows.map((row) => (
+                    <tr key={row.item} className="border-b border-slate-100 last:border-0">
+                      <td className="px-4 py-2.5 font-medium text-slate-900">{row.item}</td>
+                      {departments.map((d) => (
+                        <td key={d} className="px-4 py-2.5 text-slate-600">
+                          {row.byDept[d] ? formatNumber(row.byDept[d]) : "-"}
+                        </td>
+                      ))}
                       <td className="px-4 py-2.5 font-semibold text-slate-900">
-                        {formatNumber(g.thisMonthTotal)}
+                        {formatNumber(row.totalThisMonth)}
                       </td>
                       <td className="px-4 py-2.5">
-                        <DiffBadge diff={g.diff} diffRate={g.diffRate} />
+                        <DiffBadge diff={row.diff} diffRate={row.diffRate} />
                       </td>
                     </tr>
                   ))}
-                  {filteredGroups.length === 0 && (
+                  {filteredItemRows.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="px-4 py-8 text-center text-slate-400">
+                      <td colSpan={departments.length + 3} className="px-4 py-8 text-center text-slate-400">
                         조건에 맞는 데이터가 없습니다.
                       </td>
                     </tr>
