@@ -18,7 +18,7 @@ type GroupStat = {
   thisMonthTotal: number;
   lastMonthTotal: number;
   diff: number;
-  diffRate: number | null;
+  diffRate: number;
 };
 
 type ItemPivotRow = {
@@ -27,7 +27,7 @@ type ItemPivotRow = {
   totalThisMonth: number;
   totalLastMonth: number;
   diff: number;
-  diffRate: number | null;
+  diffRate: number;
 };
 
 const DATE_HEADERS = ["날짜", "일자", "사용일자", "사용일"];
@@ -98,13 +98,10 @@ type DeptUsage = {
   thisMonth: number;
   lastMonth: number;
   diff: number;
-  diffRate: number | null;
+  diffRate: number;
 };
 
-function DiffBadge({ diff, diffRate }: { diff: number; diffRate: number | null }) {
-  if (diffRate === null) {
-    return <span className="font-semibold text-sky-600">신규</span>;
-  }
+function DiffBadge({ diff, diffRate }: { diff: number; diffRate: number }) {
   if (diff === 0) {
     return <span className="text-slate-400">변동 없음</span>;
   }
@@ -131,7 +128,7 @@ function ItemUsageDashboard({
   const totalThisMonth = data.reduce((sum, d) => sum + d.thisMonth, 0);
   const totalLastMonth = data.reduce((sum, d) => sum + d.lastMonth, 0);
   const totalDiff = totalThisMonth - totalLastMonth;
-  const totalDiffRate = totalLastMonth > 0 ? (totalDiff / totalLastMonth) * 100 : totalThisMonth > 0 ? null : 0;
+  const totalDiffRate = totalLastMonth > 0 ? (totalDiff / totalLastMonth) * 100 : totalThisMonth > 0 ? 100 : 0;
 
   return (
     <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
@@ -267,7 +264,7 @@ export default function SupplyUsagePage() {
 
     const groupStats: GroupStat[] = Array.from(byGroup.values()).map((g) => {
       const diff = g.thisMonth - g.lastMonth;
-      const diffRate = g.lastMonth > 0 ? (diff / g.lastMonth) * 100 : g.thisMonth > 0 ? null : 0;
+      const diffRate = g.lastMonth > 0 ? (diff / g.lastMonth) * 100 : g.thisMonth > 0 ? 100 : 0;
       return {
         department: g.department,
         item: g.item,
@@ -310,7 +307,7 @@ export default function SupplyUsagePage() {
     const list = Array.from(byItem.values()).map((row) => {
       const diff = row.totalThisMonth - row.totalLastMonth;
       const diffRate =
-        row.totalLastMonth > 0 ? (diff / row.totalLastMonth) * 100 : row.totalThisMonth > 0 ? null : 0;
+        row.totalLastMonth > 0 ? (diff / row.totalLastMonth) * 100 : row.totalThisMonth > 0 ? 100 : 0;
       return { ...row, diff, diffRate };
     });
     list.sort((a, b) => a.item.localeCompare(b.item));
@@ -342,7 +339,7 @@ export default function SupplyUsagePage() {
     const list: DeptUsage[] = Array.from(byDept.values())
       .map((e) => {
         const diff = e.thisMonth - e.lastMonth;
-        const diffRate = e.lastMonth > 0 ? (diff / e.lastMonth) * 100 : e.thisMonth > 0 ? null : 0;
+        const diffRate = e.lastMonth > 0 ? (diff / e.lastMonth) * 100 : e.thisMonth > 0 ? 100 : 0;
         return { ...e, diff, diffRate };
       })
       .sort((a, b) => b.thisMonth - a.thisMonth);
@@ -464,7 +461,7 @@ export default function SupplyUsagePage() {
             </div>
 
             <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
-              <table className="w-full text-sm" style={{ minWidth: `${640 + departments.length * 100}px` }}>
+              <table className="w-full text-sm" style={{ minWidth: `${760 + departments.length * 100}px` }}>
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-50 text-left text-slate-500">
                     <th className="px-4 py-3 font-medium">품목명</th>
@@ -476,6 +473,10 @@ export default function SupplyUsagePage() {
                     <th className="whitespace-nowrap px-4 py-3 font-medium">
                       합계
                       <span className="ml-1 font-normal text-slate-400">({currentMonthLabel})</span>
+                    </th>
+                    <th className="whitespace-nowrap px-4 py-3 font-medium">
+                      지난달 합계
+                      <span className="ml-1 font-normal text-slate-400">({previousMonthLabel})</span>
                     </th>
                     <th className="whitespace-nowrap px-4 py-3 font-medium">전월 대비</th>
                   </tr>
@@ -492,6 +493,9 @@ export default function SupplyUsagePage() {
                       <td className="px-4 py-2.5 font-semibold text-slate-900">
                         {formatNumber(row.totalThisMonth)}
                       </td>
+                      <td className="px-4 py-2.5 text-slate-600">
+                        {formatNumber(row.totalLastMonth)}
+                      </td>
                       <td className="px-4 py-2.5">
                         <DiffBadge diff={row.diff} diffRate={row.diffRate} />
                       </td>
@@ -499,7 +503,7 @@ export default function SupplyUsagePage() {
                   ))}
                   {filteredItemRows.length === 0 && (
                     <tr>
-                      <td colSpan={departments.length + 3} className="px-4 py-8 text-center text-slate-400">
+                      <td colSpan={departments.length + 4} className="px-4 py-8 text-center text-slate-400">
                         조건에 맞는 데이터가 없습니다.
                       </td>
                     </tr>
