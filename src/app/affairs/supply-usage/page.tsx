@@ -193,7 +193,8 @@ export default function SupplyUsagePage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [departmentFilter, setDepartmentFilter] = useState("전체");
-  const [itemSearch, setItemSearch] = useState("");
+  const [dashboardQuery, setDashboardQuery] = useState("");
+  const [listQuery, setListQuery] = useState("");
 
   async function handleFileUpload(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -238,9 +239,15 @@ export default function SupplyUsagePage() {
     }
   }
 
-  const { groups, departments, currentMonthLabel, previousMonthLabel } = useMemo(() => {
+  const { groups, departments, itemNameOptions, currentMonthLabel, previousMonthLabel } = useMemo(() => {
     if (rows.length === 0) {
-      return { groups: [] as GroupStat[], departments: [] as string[], currentMonthLabel: "", previousMonthLabel: "" };
+      return {
+        groups: [] as GroupStat[],
+        departments: [] as string[],
+        itemNameOptions: [] as string[],
+        currentMonthLabel: "",
+        previousMonthLabel: "",
+      };
     }
 
     const maxDate = rows.reduce((max, r) => (r.date > max ? r.date : max), rows[0].date);
@@ -278,10 +285,12 @@ export default function SupplyUsagePage() {
     );
 
     const deptList = Array.from(new Set(rows.map((r) => r.department))).sort();
+    const itemNames = Array.from(new Set(rows.map((r) => r.item))).sort();
 
     return {
       groups: groupStats,
       departments: deptList,
+      itemNameOptions: itemNames,
       currentMonthLabel: `${maxDate.getFullYear()}년 ${maxDate.getMonth() + 1}월`,
       previousMonthLabel: `${prevDate.getFullYear()}년 ${prevDate.getMonth() + 1}월`,
     };
@@ -310,14 +319,16 @@ export default function SupplyUsagePage() {
 
   const filteredItemRows = itemRows.filter((row) => {
     const deptOk = departmentFilter === "전체" || (row.byDept[departmentFilter] ?? 0) > 0;
-    const itemOk = itemSearch.trim() === "" || row.item.includes(itemSearch.trim());
+    const itemOk = listQuery.trim() === "" || row.item === listQuery.trim();
     return deptOk && itemOk;
   });
 
   const itemDashboardData = useMemo(() => {
-    const term = itemSearch.trim();
+    const term = dashboardQuery.trim();
     if (!term) return null;
-    const matched = groups.filter((g) => g.item.includes(term));
+    // Requires an exact item name match (picked from the datalist) so that
+    // similarly-named items with different specs aren't mixed together.
+    const matched = groups.filter((g) => g.item === term);
     if (matched.length === 0) return null;
 
     const byDept = new Map<string, { department: string; thisMonth: number; lastMonth: number }>();
@@ -336,12 +347,8 @@ export default function SupplyUsagePage() {
       })
       .sort((a, b) => b.thisMonth - a.thisMonth);
 
-    const matchedItemNames = Array.from(new Set(matched.map((g) => g.item)));
-    const label =
-      matchedItemNames.length === 1 ? matchedItemNames[0] : `${term} (${matchedItemNames.length}개 품목)`;
-
-    return { label, list };
-  }, [groups, itemSearch]);
+    return { label: term, list };
+  }, [groups, dashboardQuery]);
 
   return (
     <div className="flex flex-1 flex-col bg-slate-50">
@@ -398,6 +405,40 @@ export default function SupplyUsagePage() {
 
         {groups.length > 0 && (
           <>
+            <datalist id="item-name-options">
+              {itemNameOptions.map((name) => (
+                <option key={name} value={name} />
+              ))}
+            </datalist>
+
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <label className="flex items-center gap-2 text-sm font-medium text-slate-600">
+                대시보드 품목
+                <input
+                  type="text"
+                  list="item-name-options"
+                  value={dashboardQuery}
+                  onChange={(e) => setDashboardQuery(e.target.value)}
+                  placeholder="정확한 품목명을 목록에서 선택"
+                  className="h-9 w-64 rounded border border-slate-300 px-2 text-sm text-slate-800"
+                />
+              </label>
+              {dashboardQuery.trim() !== "" && !itemDashboardData && (
+                <span className="text-xs text-amber-600">
+                  목록에 있는 품목명과 정확히 일치해야 그래프가 표시됩니다.
+                </span>
+              )}
+            </div>
+
+            {itemDashboardData && (
+              <ItemUsageDashboard
+                itemLabel={itemDashboardData.label}
+                data={itemDashboardData.list}
+                currentMonthLabel={currentMonthLabel}
+                previousMonthLabel={previousMonthLabel}
+              />
+            )}
+
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <select
                 value={departmentFilter}
@@ -413,22 +454,14 @@ export default function SupplyUsagePage() {
               </select>
               <input
                 type="text"
-                value={itemSearch}
-                onChange={(e) => setItemSearch(e.target.value)}
-                placeholder="품목명 검색"
-                className="h-9 w-48 rounded border border-slate-300 px-2 text-sm text-slate-800"
+                list="item-name-options"
+                value={listQuery}
+                onChange={(e) => setListQuery(e.target.value)}
+                placeholder="목록 품목명 검색"
+                className="h-9 w-64 rounded border border-slate-300 px-2 text-sm text-slate-800"
               />
               <span className="text-xs text-slate-400">{filteredItemRows.length}개 품목</span>
             </div>
-
-            {itemDashboardData && (
-              <ItemUsageDashboard
-                itemLabel={itemDashboardData.label}
-                data={itemDashboardData.list}
-                currentMonthLabel={currentMonthLabel}
-                previousMonthLabel={previousMonthLabel}
-              />
-            )}
 
             <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
               <table className="w-full text-sm" style={{ minWidth: `${640 + departments.length * 100}px` }}>
