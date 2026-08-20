@@ -24,12 +24,37 @@ type GroupStat = {
 };
 
 const DATE_HEADERS = ["날짜", "일자", "사용일자", "사용일"];
-const DEPT_HEADERS = ["부서명", "부서"];
+const DEPT_HEADERS = ["부서명", "부서", "창고명", "창고"];
 const ITEM_HEADERS = ["품목명", "품목", "물품명", "물품"];
 const QTY_HEADERS = ["사용량", "수량", "사용수량"];
 
 function findColumnIndex(headers: string[], candidates: string[]): number {
-  return headers.findIndex((h) => candidates.includes(String(h ?? "").trim()));
+  return headers.findIndex((h) =>
+    candidates.some((c) => String(h ?? "").trim().includes(c))
+  );
+}
+
+type HeaderMatch = {
+  headerRowIndex: number;
+  dateIdx: number;
+  deptIdx: number;
+  itemIdx: number;
+  qtyIdx: number;
+};
+
+function findHeaderRow(sheet: unknown[][]): HeaderMatch | null {
+  const scanLimit = Math.min(sheet.length, 10);
+  for (let i = 0; i < scanLimit; i++) {
+    const headers = sheet[i].map((h) => String(h ?? "").trim());
+    const dateIdx = findColumnIndex(headers, DATE_HEADERS);
+    const deptIdx = findColumnIndex(headers, DEPT_HEADERS);
+    const itemIdx = findColumnIndex(headers, ITEM_HEADERS);
+    const qtyIdx = findColumnIndex(headers, QTY_HEADERS);
+    if (dateIdx !== -1 && deptIdx !== -1 && itemIdx !== -1 && qtyIdx !== -1) {
+      return { headerRowIndex: i, dateIdx, deptIdx, itemIdx, qtyIdx };
+    }
+  }
+  return null;
 }
 
 function parseDateValue(value: unknown): Date | null {
@@ -40,8 +65,14 @@ function parseDateValue(value: unknown): Date | null {
     return Number.isNaN(epoch.getTime()) ? null : epoch;
   }
   if (typeof value === "string") {
-    const trimmed = value.trim().replace(/\./g, "-").replace(/\//g, "-");
-    const parsed = new Date(trimmed);
+    // Handles plain dates as well as formats like "2026/06/01 -1" (date + line no.)
+    const match = value.match(/(\d{4})[.\/-](\d{1,2})[.\/-](\d{1,2})/);
+    if (match) {
+      const [, y, m, d] = match;
+      const date = new Date(Number(y), Number(m) - 1, Number(d));
+      return Number.isNaN(date.getTime()) ? null : date;
+    }
+    const parsed = new Date(value.trim());
     return Number.isNaN(parsed.getTime()) ? null : parsed;
   }
   return null;
@@ -75,20 +106,16 @@ export default function SupplyUsagePage() {
       if (sheet.length < 2) {
         throw new Error("데이터가 없습니다. 헤더와 데이터 행이 필요합니다.");
       }
-      const headers = sheet[0].map((h) => String(h ?? "").trim());
-      const dateIdx = findColumnIndex(headers, DATE_HEADERS);
-      const deptIdx = findColumnIndex(headers, DEPT_HEADERS);
-      const itemIdx = findColumnIndex(headers, ITEM_HEADERS);
-      const qtyIdx = findColumnIndex(headers, QTY_HEADERS);
-
-      if (dateIdx === -1 || deptIdx === -1 || itemIdx === -1 || qtyIdx === -1) {
+      const headerMatch = findHeaderRow(sheet);
+      if (!headerMatch) {
         throw new Error(
-          "필수 열을 찾을 수 없습니다. 날짜/부서명/품목명/사용량 열이 필요합니다."
+          "필수 열을 찾을 수 없습니다. 날짜/부서명(창고명)/품목명/사용량 열이 필요합니다."
         );
       }
+      const { headerRowIndex, dateIdx, deptIdx, itemIdx, qtyIdx } = headerMatch;
 
       const parsed: UsageRow[] = [];
-      for (const r of sheet.slice(1)) {
+      for (const r of sheet.slice(headerRowIndex + 1)) {
         const date = parseDateValue(r[dateIdx]);
         const department = String(r[deptIdx] ?? "").trim();
         const item = String(r[itemIdx] ?? "").trim();
@@ -203,8 +230,9 @@ export default function SupplyUsagePage() {
         </div>
 
         <p className="mt-2 text-xs text-slate-400">
-          엑셀 파일에 <strong className="font-semibold text-slate-500">날짜, 부서명, 품목명, 사용량</strong> 열이
-          포함되어야 합니다 (열 이름은 순서 상관없이 자동으로 인식됩니다). 각 행은 하루치 사용 기록 1건입니다.
+          엑셀 파일에 <strong className="font-semibold text-slate-500">날짜(일자), 부서명(창고명), 품목명, 사용량(수량)</strong> 열이
+          포함되어야 합니다 (열 이름·순서는 상관없이 자동으로 인식되고, 단가/공급가액/부가세/합계/거래처명 등
+          다른 열은 무시됩니다). 각 행은 사용 기록 1건입니다.
         </p>
 
         {loading && <p className="mt-4 text-sm text-slate-500">파일을 읽는 중입니다...</p>}
@@ -229,7 +257,7 @@ export default function SupplyUsagePage() {
                 onChange={(e) => setDepartmentFilter(e.target.value)}
                 className="h-9 rounded border border-slate-300 px-2 text-sm text-slate-800"
               >
-                <option value="전체">전체 부서</option>
+                <option value="전체">전체 부서/창고</option>
                 {departments.map((d) => (
                   <option key={d} value={d}>
                     {d}
@@ -250,7 +278,7 @@ export default function SupplyUsagePage() {
               <table className="w-full min-w-[820px] text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-50 text-left text-slate-500">
-                    <th className="px-4 py-3 font-medium">부서명</th>
+                    <th className="px-4 py-3 font-medium">부서/창고명</th>
                     <th className="px-4 py-3 font-medium">품목명</th>
                     <th className="px-4 py-3 font-medium">일 사용량</th>
                     <th className="px-4 py-3 font-medium">주 사용량</th>
