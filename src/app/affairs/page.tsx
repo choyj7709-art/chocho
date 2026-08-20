@@ -1,10 +1,23 @@
-import PlaceholderPage from "@/components/PlaceholderPage";
+import SubMenuPage from "@/components/SubMenuPage";
+
+const items = [
+  {
+    href: "/affairs/supply-usage",
+    label: "물품 사용량",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7" strokeWidth={1.8}>
+        <path
+          d="M4 7l8-4 8 4-8 4-8-4Z"
+          stroke="currentColor"
+          strokeLinejoin="round"
+        />
+        <path d="M4 7v10l8 4 8-4V7" stroke="currentColor" strokeLinejoin="round" />
+        <path d="M12 11v10" stroke="currentColor" />
+      </svg>
+    ),
+  },
+];
 
 export default function AffairsPage() {
-  return (
-    <PlaceholderPage
-      title="총무관리"
-      description="비품, 시설, 계약 관리 기능은 곧 만나보실 수 있습니다."
-    />
-  );
+  return <SubMenuPage title="총무관리" items={items} />;
 }
