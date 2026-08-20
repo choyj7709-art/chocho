@@ -349,7 +349,17 @@ export default function SupplyUsagePage() {
 
   return (
     <div className="flex flex-1 flex-col bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
+      <style jsx global>{`
+        @media print {
+          table thead {
+            display: table-header-group;
+          }
+          table tr {
+            break-inside: avoid;
+          }
+        }
+      `}</style>
+      <header className="border-b border-slate-200 bg-white print:hidden">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-4 px-6">
           <Link href="/" className="text-sm font-medium text-slate-400 transition-colors hover:text-slate-700">
             업무 지킴이
@@ -363,8 +373,8 @@ export default function SupplyUsagePage() {
         </div>
       </header>
 
-      <section className="mx-auto w-full max-w-6xl flex-1 px-6 py-10">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+      <section className="mx-auto w-full max-w-6xl flex-1 px-6 py-10 print:px-0 print:py-0">
+        <div className="flex flex-wrap items-center justify-between gap-4 print:hidden">
           <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">물품 사용량</h1>
           <label className="flex items-center gap-2 text-sm font-medium text-slate-600">
             엑셀 업로드
@@ -380,15 +390,15 @@ export default function SupplyUsagePage() {
           </label>
         </div>
 
-        <p className="mt-2 text-xs text-slate-400">
+        <p className="mt-2 text-xs text-slate-400 print:hidden">
           엑셀 파일에 <strong className="font-semibold text-slate-500">날짜(일자), 부서명(창고명), 품목명, 사용량(수량)</strong> 열이
           포함되어야 합니다 (열 이름·순서는 상관없이 자동으로 인식되고, 단가/공급가액/부가세/합계/거래처명 등
           다른 열은 무시됩니다). 각 행은 사용 기록 1건입니다.
         </p>
 
-        {loading && <p className="mt-4 text-sm text-slate-500">파일을 읽는 중입니다...</p>}
+        {loading && <p className="mt-4 text-sm text-slate-500 print:hidden">파일을 읽는 중입니다...</p>}
         {error && (
-          <p className="mt-4 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+          <p className="mt-4 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600 print:hidden">
             {error}
           </p>
         )}
@@ -408,7 +418,7 @@ export default function SupplyUsagePage() {
               ))}
             </datalist>
 
-            <div className="mt-6 flex flex-wrap items-center gap-3">
+            <div className="mt-6 flex flex-wrap items-center gap-3 print:hidden">
               <label className="flex items-center gap-2 text-sm font-medium text-slate-600">
                 대시보드 품목
                 <input
@@ -428,15 +438,17 @@ export default function SupplyUsagePage() {
             </div>
 
             {itemDashboardData && (
-              <ItemUsageDashboard
-                itemLabel={itemDashboardData.label}
-                data={itemDashboardData.list}
-                currentMonthLabel={currentMonthLabel}
-                previousMonthLabel={previousMonthLabel}
-              />
+              <div className="print:hidden">
+                <ItemUsageDashboard
+                  itemLabel={itemDashboardData.label}
+                  data={itemDashboardData.list}
+                  currentMonthLabel={currentMonthLabel}
+                  previousMonthLabel={previousMonthLabel}
+                />
+              </div>
             )}
 
-            <div className="mt-6 flex flex-wrap items-center gap-3">
+            <div className="mt-6 flex flex-wrap items-center gap-3 print:hidden">
               <select
                 value={departmentFilter}
                 onChange={(e) => setDepartmentFilter(e.target.value)}
@@ -458,9 +470,16 @@ export default function SupplyUsagePage() {
                 className="h-9 w-64 rounded border border-slate-300 px-2 text-sm text-slate-800"
               />
               <span className="text-xs text-slate-400">{filteredItemRows.length}개 품목</span>
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="ml-auto rounded bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-700"
+              >
+                사용량 PDF로 저장
+              </button>
             </div>
 
-            <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+            <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white print:mt-0 print:overflow-visible print:rounded-none print:border-0">
               <table className="w-full text-sm" style={{ minWidth: `${760 + departments.length * 100}px` }}>
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-50 text-left text-slate-500">
@@ -486,17 +505,17 @@ export default function SupplyUsagePage() {
                     <tr key={row.item} className="border-b border-slate-100 last:border-0">
                       <td className="px-4 py-2.5 font-medium text-slate-900">{row.item}</td>
                       {departments.map((d) => (
-                        <td key={d} className="px-4 py-2.5 text-slate-600">
+                        <td key={d} className="px-4 py-2.5 text-center text-slate-600">
                           {row.byDept[d] ? formatNumber(row.byDept[d]) : "-"}
                         </td>
                       ))}
-                      <td className="px-4 py-2.5 font-semibold text-slate-900">
+                      <td className="px-4 py-2.5 text-center font-semibold text-slate-900">
                         {formatNumber(row.totalThisMonth)}
                       </td>
-                      <td className="px-4 py-2.5 text-slate-600">
+                      <td className="px-4 py-2.5 text-center text-slate-600">
                         {formatNumber(row.totalLastMonth)}
                       </td>
-                      <td className="px-4 py-2.5">
+                      <td className="px-4 py-2.5 text-center">
                         <DiffBadge diff={row.diff} diffRate={row.diffRate} />
                       </td>
                     </tr>
